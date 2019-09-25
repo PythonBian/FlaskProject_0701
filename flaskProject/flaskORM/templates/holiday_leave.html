@@ -4,11 +4,19 @@
     请假
 {% endblock %}
 
+{% block style %}
+    <style>
+        th{
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
 {% block label %}
 {% endblock %}
 
 {% block content %}
-    <form>
+    <form method="post">
         <table class="table table-bordered">
                 <tr>
                     <th colspan="4" style="text-align: center"><h1>请假条</h1></th>
@@ -26,7 +34,7 @@
                             <option>年假</option>
                             <option>缺勤</option>
                             <option>加班</option>
-                            <option>调休</option>
+                            <option selected="selected">调休</option>
                             <option>出差</option>
                         </select>
                     </td>
@@ -54,8 +62,6 @@
                         <input class="btn btn-user btn-primary" type="submit" value="提交">
                     </td>
                 </tr>
-
-
         </table>
     </form>
 {% endblock %}

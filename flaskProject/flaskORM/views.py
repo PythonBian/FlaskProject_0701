@@ -1,12 +1,13 @@
 from flask import render_template
 from main import app
-from models import Curriculum
 from flask import redirect
 from flask import session
 
 import hashlib
 import datetime
 import functools
+
+from models import *
 
 def setPassword(password):
     result = hashlib.md5(password.encode()).hexdigest()
@@ -148,11 +149,6 @@ def logout():
     del session["username"]
     return response
 
-
-@app.route("/base/")
-def base():
-    return render_template("base.html")
-
 @app.route("/index/") #官方的路由匹配器
 @loginValid
 def exindex():
@@ -188,6 +184,34 @@ def register():
         user.save()
     return render_template("register.html")
 
-@app.route("/holiday_leave/")
+@app.route("/holiday_leave/",methods=["GET","POST"])
 def holiday_leave():
+    if request.method == "POST":
+        data = request.form
+        request_user= data.get("request_user")
+        request_type = data.get("request_type")
+        start_time = data.get("start_time")
+        end_time = data.get("end_time")
+        phone = data.get("phone")
+        request_description = data.get("request_description")
+
+        leave = Leave()
+        leave.request_id = request.cookies.get("id")
+        leave.request_name = request_user
+        leave.request_type = request_type  # 假期类型
+        leave.request_start_time = start_time  # 起始时间
+        leave.request_end_time = end_time  # 结束时间
+        leave.request_description = request_description  # 请假事由
+        leave.request_phone = phone  # 联系方式
+        leave.request_status = "0"  # 假条状态
+        leave.save()
+        return redirect("/leave_list/")
     return render_template("holiday_leave.html")
+
+@app.route("/leave_list/")
+def leave_list():
+    """
+
+    """
+    leaves = Leave.query.offset(0).limit(5)
+    return render_template("leave_list.html",leaves = leaves)

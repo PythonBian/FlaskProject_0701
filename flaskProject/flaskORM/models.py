@@ -26,6 +26,12 @@ class User(BaseModel):
     email = models.Column(models.String(32))
 
 class Leave(BaseModel):
+    """
+    请假  0
+    批准  1
+    驳回  2
+    销假  3
+    """
     __tablename__ = "leave"
     request_id = models.Column(models.Integer) #请假人id
     request_name = models.Column(models.String(32)) #请假人姓名
