@@ -19,3 +19,6 @@ def views():
     print("我是视图")
 
 views()
+
+# import os
+# os.system("ping 127.0.0.1")

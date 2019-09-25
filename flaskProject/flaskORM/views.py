@@ -187,3 +187,7 @@ def register():
         user.email = email
         user.save()
     return render_template("register.html")
+
+@app.route("/holiday_leave/")
+def holiday_leave():
+    return render_template("holiday_leave.html")
