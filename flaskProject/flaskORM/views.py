@@ -1,7 +1,16 @@
-import datetime
 from flask import render_template
 from main import app
 from models import Curriculum
+from flask import redirect
+from flask import session
+
+import hashlib
+import datetime
+import functools
+
+def setPassword(password):
+    result = hashlib.md5(password.encode()).hexdigest()
+    return result
 
 class Calendar:
     """
@@ -81,21 +90,71 @@ class Calendar:
                 print(day, end="  ")
             print()
 
+def loginValid(fun):
+    @functools.wraps(fun) #保留原函数的名称
+    def inner(*args,**kwargs):
+        username = request.cookies.get("username")
+        id = request.cookies.get("id","0")
+        user = User.query.get(int(id))
+        session_username = session.get("username")
+        if user: #检测是否有对应id的用户
+            if user.user_name == username and username == session_username: #用户名是否对应
+                return fun(*args,**kwargs)
+            else:
+                return redirect("/login/")
+        else:
+            return redirect("/login/")
+    return inner
 
-@app.route("/")
+
+@app.route("/")  #然后再进行路由
+@loginValid #先执行loginValid
 def index():
     name = "laobian"
     return render_template("index.html",**locals())
 
-@app.route("/login/")
+
+@app.route("/login/",methods=["get","post"])
 def login():
-    return render_template("login.html")
+    error = ""
+    if request.method == "POST":
+        form_data = request.form
+        email = form_data.get("email")
+        password = form_data.get("password")
+
+        user = User.query.filter_by(email = email).first()
+        if user:
+            db_password = user.password
+            if setPassword(password) == db_password:
+                response = redirect("/index/")
+                response.set_cookie("username",user.user_name)
+                response.set_cookie("email",user.email)
+                response.set_cookie("id",str(user.id))
+                session["username"] = user.user_name
+                return response
+            else:
+                 error = "密码错误"
+        else:
+            error = "用户名不存在"
+    return render_template("login.html",error = error)
+
+@app.route("/logout/")
+def logout():
+    response = redirect("/login/")
+    response.delete_cookie("username")
+    response.delete_cookie("email")
+    response.delete_cookie("id")
+    session.pop("username")
+    del session["username"]
+    return response
+
 
 @app.route("/base/")
 def base():
     return render_template("base.html")
 
-@app.route("/index/")
+@app.route("/index/") #官方的路由匹配器
+@loginValid
 def exindex():
     # c = Curriculum()
     # c.c_id = "0001"
@@ -124,7 +183,7 @@ def register():
         email = request.form.get("email")
         user = User()
         user.user_name = username
-        user.password = password
+        user.password = setPassword(password)
         user.email = email
         user.save()
     return render_template("register.html")
