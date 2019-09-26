@@ -250,7 +250,10 @@ def register():
         user.save()
     return render_template("register.html")
 
+from main import csrf
+
 @app.route("/holiday_leave/",methods=["GET","POST"])
+@csrf.exempt
 def holiday_leave():
     if request.method == "POST":
         data = request.form
@@ -281,3 +284,44 @@ def leave_list(page):
     pager = Pager(leaves,2)
     page_data = pager.page_data(page)
     return render_template("leave_list.html",**locals())
+import json
+from flask import jsonify #flask封装后的json方法
+
+# @app.route("/cancel/<int:id>/")
+# def cancel(id):
+#     leave = Leave.query.get(id)
+#     leave.delete()
+#     return jsonify({"data":"删除成功"})
+
+from flask import jsonify #flask封装后的json方法
+
+@app.route("/cancel/",methods=["GET","POST"])
+def cancel():
+    # data1 = request.args
+    # data2 = request.data
+    # data3 = request.form
+    id = request.form.get("id") #通过args接受get请求数据
+    leave = Leave.query.get(int(id))
+    leave.delete()
+    return jsonify({"data":"删除成功"}) #返回json数据
+
+from forms import TaskForm
+
+@app.route("/add_task/",methods=["GET","POST"])
+def add_task():
+    """
+    print(task.errors) 表单校验错误
+    print(task.validate_on_submit()) 判断是否是一个有效的post请求
+    print(task.validate()) 判断是否是一个合法的post请求
+    print(task.data) 提交的数据
+    """
+    errors = ""
+    task = TaskForm()
+    if request.method == "POST":
+        if task.validate_on_submit(): #判断是否是一个有效的post请求
+            formData = task.data
+        else:
+            errors_list = list(task.errors.keys())
+            errors = task.errors
+            print(errors)
+    return render_template("add_task.html",**locals())
