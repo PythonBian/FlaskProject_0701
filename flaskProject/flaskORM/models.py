@@ -18,7 +18,8 @@ class Curriculum(BaseModel):
     c_id = models.Column(models.String(32))
     c_name = models.Column(models.String(32))
     c_time = models.Column(models.Date)
-
+    def __repr__(self):
+        return self.c_name
 class User(BaseModel):
     __tablename__ = "user"
     user_name = models.Column(models.String(32))

@@ -9,6 +9,72 @@ import functools
 
 from models import *
 
+
+class Pager:
+    """
+    flask分页通过sqlalachemy查询进行分页
+    offset 偏移，开始查询的位置
+    limit 单页条数
+    分页器需要具备的功能
+    页码
+    分页数据
+    是否第一页
+    是否最后一页
+    """
+
+    def __init__(self, data, page_size):
+        """
+
+        :param data: 要分页的数据
+        :param page_size: 每页多少条
+        """
+        self.data = data #总数据
+        self.page_size = page_size #单页数据
+        self.is_start = False
+        self.is_end = False
+        self.page_count = len(data)
+        self.next_page = 0 #下一页
+        self.previous_page = 0 #上一页
+        self.page_nmuber = self.page_count/page_size
+        #(data+page_size-1)//page_size
+        if self.page_nmuber == int(self.page_nmuber):
+            self.page_nmuber = int(self.page_nmuber)
+        else:
+            self.page_nmuber = int(self.page_nmuber)+1
+
+        self.page_range = range(1,self.page_nmuber+1)#页码范围
+    def page_data(self,page):
+        """
+        返回分页数据
+        :param page: 页码
+        page_size = 10
+        1    offect 0  limit(10)
+        2    offect 10 limit(10)
+        page_size = 10
+        1     start 0   end  10
+        2     start 10   end  20
+        3     start 20   end  30
+        """
+        self.next_page = int(page) + 1
+        self.previous_page = int(page) - 1
+        if page <= self.page_range[-1]:
+            page_start = (page - 1)*self.page_size
+            page_end = page*self.page_size
+            # data = self.data.offset(page_start).limit(self.page_size)
+            data = self.data[page_start:page_end]
+            if page == 1:
+                self.is_start = True
+            else:
+                self.is_start = False
+            if page == self.page_range[-1]:
+                self.is_end = True
+            else:
+                self.is_end = False
+        else:
+            data = ["没有数据"]
+        return data
+
+
 def setPassword(password):
     result = hashlib.md5(password.encode()).hexdigest()
     return result
@@ -205,13 +271,13 @@ def holiday_leave():
         leave.request_phone = phone  # 联系方式
         leave.request_status = "0"  # 假条状态
         leave.save()
-        return redirect("/leave_list/")
+        return redirect("/leave_list/1/")
     return render_template("holiday_leave.html")
 
-@app.route("/leave_list/")
-def leave_list():
-    """
-
-    """
-    leaves = Leave.query.offset(0).limit(5)
-    return render_template("leave_list.html",leaves = leaves)
+@app.route("/leave_list/<int:page>/")
+@loginValid
+def leave_list(page):
+    leaves = Leave.query.all()
+    pager = Pager(leaves,2)
+    page_data = pager.page_data(page)
+    return render_template("leave_list.html",**locals())
