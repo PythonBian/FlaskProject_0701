@@ -43,3 +43,6 @@ class Leave(BaseModel):
     request_phone = models.Column(models.String(32)) #联系方式
     request_status = models.Column(models.String(32))  # 假条状态
 
+class Picture(BaseModel):
+    picture = models.Column(models.String(64))
+

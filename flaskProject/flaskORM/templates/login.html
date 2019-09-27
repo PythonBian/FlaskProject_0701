@@ -35,6 +35,7 @@
                 <h1 class="h4 text-gray-900 mb-4">用户登录!</h1>
               </div>
               <form class="user" method="post">
+{#                <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}">#}
                 <div class="form-group">
                   <input type="email" class="form-control form-control-user" name = "email" id="exampleInputEmail" placeholder="邮箱">
                 </div>

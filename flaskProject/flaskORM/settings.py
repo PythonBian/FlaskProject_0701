@@ -1,7 +1,7 @@
 import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
+STATICFILES_DIR = os.path.join(BASE_DIR,"static")
 class Config:
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///"+os.path.join(BASE_DIR,"ORM.sqlite") #数据库地址 sqllite
