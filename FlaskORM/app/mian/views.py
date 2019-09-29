@@ -1,16 +1,21 @@
 import os
+import json
 import hashlib
 import datetime
 import functools
 
+from flask import jsonify #flask封装后的json方法
 from flask import session
+from flask import request
 from flask import redirect
 from flask import render_template
 
 #from main import csrf
-from models import *
-from main import app
-
+from app.models import *
+from . import main
+from .forms import TaskForm
+from app import api
+from flask_restful import Resource
 
 class Pager:
     """
@@ -176,14 +181,14 @@ def loginValid(fun):
     return inner
 
 
-@app.route("/")  #然后再进行路由
+@main.route("/")  #然后再进行路由
 @loginValid #先执行loginValid
 def index():
     name = "laobian"
     return render_template("index.html",**locals())
 
 
-@app.route("/login/",methods=["get","post"])
+@main.route("/login/",methods=["get","post"])
 #@csrf.exempt
 def login():
     error = ""
@@ -208,7 +213,7 @@ def login():
             error = "用户名不存在"
     return render_template("login.html",error = error)
 
-@app.route("/logout/")
+@main.route("/logout/")
 def logout():
     response = redirect("/login/")
     response.delete_cookie("username")
@@ -218,7 +223,7 @@ def logout():
     del session["username"]
     return response
 
-@app.route("/index/") #官方的路由匹配器
+@main.route("/index/") #官方的路由匹配器
 @loginValid
 def exindex():
     # c = Curriculum()
@@ -229,15 +234,14 @@ def exindex():
     curr_list = Curriculum.query.all()
     return render_template("ex_index.html",curr_list = curr_list)
 
-@app.route("/userinfo/")
+@main.route("/userinfo/")
 def userinfo():
     calendar = Calendar().return_month()
     now = datetime.datetime.now()
     return render_template("userinfo.html",**locals())
 
-from flask import request
-from models import User
-@app.route("/register/",methods=["GET","POST"])
+
+@main.route("/register/",methods=["GET","POST"])
 def register():
     """
     form表单提交的数据由request.form接受
@@ -255,7 +259,7 @@ def register():
 
 
 
-@app.route("/holiday_leave/",methods=["GET","POST"])
+@main.route("/holiday_leave/",methods=["GET","POST"])
 # @csrf.exempt
 def holiday_leave():
     if request.method == "POST":
@@ -280,7 +284,7 @@ def holiday_leave():
         return redirect("/leave_list/1/")
     return render_template("holiday_leave.html")
 
-@app.route("/leave_list/<int:page>/")
+@main.route("/leave_list/<int:page>/")
 @loginValid
 def leave_list(page):
     leaves = Leave.query.all()
@@ -290,15 +294,15 @@ def leave_list(page):
 import json
 from flask import jsonify #flask封装后的json方法
 
-# @app.route("/cancel/<int:id>/")
+# @main.route("/cancel/<int:id>/")
 # def cancel(id):
 #     leave = Leave.query.get(id)
 #     leave.delete()
 #     return jsonify({"data":"删除成功"})
 
-from flask import jsonify #flask封装后的json方法
 
-@app.route("/cancel/",methods=["GET","POST"])
+
+@main.route("/cancel/",methods=["GET","POST"])
 def cancel():
     # data1 = request.args
     # data2 = request.data
@@ -308,9 +312,9 @@ def cancel():
     leave.delete()
     return jsonify({"data":"删除成功"}) #返回json数据
 
-from forms import TaskForm
 
-@app.route("/add_task/",methods=["GET","POST"])
+
+@main.route("/add_task/",methods=["GET","POST"])
 def add_task():
     """
     print(task.errors) 表单校验错误
@@ -329,7 +333,7 @@ def add_task():
             print(errors)
     return render_template("add_task.html",**locals())
 from settings import STATICFILES_DIR
-@app.route("/picture/",methods=["GET","POST"])
+@main.route("/picture/",methods=["GET","POST"])
 def picture():
     p = {"picture":"img/1.jpg"}
     if request.method == "POST":
@@ -343,13 +347,12 @@ def picture():
         p.save()
     return render_template("picture.html",p = p)
 
-@app.route("/empty/")
+@main.route("/empty/")
 def empty():
     return render_template("empty.html")
 
 
-from main import api
-from flask_restful import Resource
+
 
 @api.resource("/Api/leave/")
 class LeaveApi(Resource):

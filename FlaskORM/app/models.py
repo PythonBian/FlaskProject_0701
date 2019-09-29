@@ -1,4 +1,4 @@
-from main import models
+from app import models
 
 class BaseModel(models.Model):
     __abstract__ = True #声明当前类是抽象类，被继承调用不被创建

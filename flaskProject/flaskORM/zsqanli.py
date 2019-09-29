@@ -36,6 +36,8 @@
 
 
 
+
+
 class Pager:
     """
     flask分页通过sqlalachemy查询进行分页
@@ -97,21 +99,44 @@ class Pager:
             data = ["没有数据"]
         return data
 
-from models import Curriculum
-if __name__ == '__main__':
-    while True:
-        page = int(input("页码>>>"))
+# from models import Curriculum
+# if __name__ == '__main__':
+#     while True:
+#         page = int(input("页码>>>"))
+#
+#         data = Curriculum.query.all()
+#         page_size = 3
+#         pager = Pager(data,page_size)
+#         print("当前页码是：%s"%page)
+#         print("共%s条数据" % (pager.page_count,))
+#         print("总页数：%s"%(pager.page_nmuber,))
+#         print("页码范围：%s"%str(list(pager.page_range)))
+#         page_data = pager.page_data(page)
+#         print("页面数据%s"%(page_data))
+#         print("是否首页：%s"%(pager.is_start,))
+#         print("是否尾页：%s"%(pager.is_end,))
+#
+#
 
-        data = Curriculum.query.all()
-        page_size = 3
-        pager = Pager(data,page_size)
-        print("当前页码是：%s"%page)
-        print("共%s条数据" % (pager.page_count,))
-        print("总页数：%s"%(pager.page_nmuber,))
-        print("页码范围：%s"%str(list(pager.page_range)))
-        page_data = pager.page_data(page)
-        print("页面数据%s"%(page_data))
-        print("是否首页：%s"%(pager.is_start,))
-        print("是否尾页：%s"%(pager.is_end,))
+# class Test:
+#     name = 1
+#     age = 2
+#
+# t = Test()
+# print(t.name)
+# print(t.age)
+# setattr(t,"name",4)
+# print(t.name)
+# print(Test.name)
 
+import requests
 
+url = "http://sxpth.cn/"
+
+# headers = {
+#     "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
+# }
+
+req = requests.get(url)
+response = req.content
+print(response)
